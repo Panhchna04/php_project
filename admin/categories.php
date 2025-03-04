@@ -10,7 +10,7 @@
         <?php include('../admin/include/navbar.php') ?>
         <div class="mt-4">
               <!-- Button trigger modal -->
-            <button name="category_add" type="button" class="btn bg-gradient-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <button type="button" class="btn bg-gradient-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 <i class="fa-solid fa-folder-plus"></i>&nbsp;
                 ADD Category           
             </button>
@@ -25,21 +25,25 @@
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">New Categories</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="" method="post">
-                        <div class="form-group">
-                            <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Enter Your Categories Name" name="cate_name" id="cate_name">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn bg-gradient-success">Save</button>
-                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">New Categories</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="" method="post">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Enter Your Categories Name" name="category_name" id="category_name">
+                            </div>
+                            <div class="form-control mt-4">
+                                <input type="file" id="category_img" name="category_img" required>
+                            </div>
+                            <div class="modal-footer">
+                                <input name="btn_add_category" type="submit" class="btn bg-gradient-success" value="ADD">
+                                <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </form>
+                    </div>
+                
                 </div>
             </div>
             </div>
@@ -49,6 +53,7 @@
                 <tr>
                     <th scope="col">ID</th>
                     <th scope="col">NAME CATEGORISE</th>
+                    <th scope="col">ACTIVES</th>
                 </tr>
             </thead>
             <tbody>
