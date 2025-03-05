@@ -1,7 +1,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <?php
-
+$con = new mysqli('localhost', 'root', '', 'ecommerce');
 try {
     $con = new PDO('mysql:host=localhost;dbname=ecommerce', 'root', '');
     $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -96,26 +96,25 @@ function logout(){
 }
 logout();
 function insert_data() {
-    global $con; 
-    if (isset($_POST['btn_add'])) {
+    global $con;
+    if (isset($_POST['btn_add_product'])) {
         $name = $_POST['pro_name'];
         $price = $_POST['pro_price'];
         $stock = $_POST['pro_stock'];
         $type = $_POST['pro_type'];
-        
-        if (isset($_FILES['pro_image']) && $_FILES['pro_image']['error'] === UPLOAD_ERR_OK) {
+        if (isset($_FILES['pro_image'])) {
+            $image = $_FILES['pro_image']['name'];
+        } else {
+            $image = null;
+        }
+        if (!empty($name) && !empty($price) && !empty($stock) && !empty($type) && !empty($image)) {
             $image = date('YmdHis') . '_' . basename($_FILES['pro_image']['name']);
             $path = 'images/' . $image;
             // Move the uploaded file
             if (move_uploaded_file($_FILES['pro_image']['tmp_name'], $path)) {
-                $sql = "INSERT INTO `products` (`name`, `stock`, `price`, `tpye`, `images`) 
-                        VALUES (:name, :stock, :price, :type, :image)";
-                $rs = $con->prepare($sql);
-                $rs->bindParam(':name', $name);
-                $rs->bindParam(':stock', $stock);
-                $rs->bindParam(':price', $price);
-                $rs->bindParam(':type', $type);
-                $rs->bindParam(':image', $image);
+                $sql = ("INSERT INTO `products`(`name`, `stock`, `price`, `tpye`, `images`) 
+                                VALUES ('$name','$stock','$price','$type','$image')");
+                $rs = $con->query($sql);
                 if ($rs) {
                     echo "
                         <script>
@@ -128,14 +127,16 @@ function insert_data() {
                             });
                         </script>
                     ";
-                    header("Location: ./product.php");
-                    exit(); 
+                   header( "Location: ./product.php");
+                   
                 }
-            }
+            } 
         }
+      
     }
 }
 insert_data();
+
 function get_data() {
     global $con; 
     $sql = $con->query("SELECT * FROM `products` ORDER BY id DESC");
@@ -284,7 +285,6 @@ function search_data() {
         }
     }
 }
-// category function
 
 
 
