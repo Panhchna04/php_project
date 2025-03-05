@@ -53,7 +53,7 @@
                   </div>
                   <input type="hidden" name="pro_id" id="pro_id">
                   <div class="modal-footer">
-                    <input id="add" class="btn btn-outline-danger" type="submit" name="btn_add" value="ADD">
+                    <input id="add" class="btn btn-outline-danger" type="submit" name="btn_add_product" value="ADD">
                     <input id="close" class="btn btn-outline-primary" type="submit" name="btn_close" value="CLOSE">
                     <input id="edit" class="btn btn-outline-success" type="submit" name="btn_update" value="EDIT" style="display: none;">
                   </div>
