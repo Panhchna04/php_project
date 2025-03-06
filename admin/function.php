@@ -1,21 +1,28 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <?php
-
 $con = new mysqli('localhost', 'root', '', 'ecommerce');
-function register(){
+try {
+    $con = new PDO('mysql:host=localhost;dbname=ecommerce', 'root', '');
+    $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Connection failed: " . $e->getMessage());
+}
+function register() {
     global $con;
-    if(isset($_POST['btn_register'])){
-        // echo 123;
+    if (isset($_POST['btn_register'])) {
         $password = $_POST['password'];
-        $email    = $_POST['email'];
+        $email = $_POST['email'];
         $username = $_POST['username'];
-        if(!empty($password) && !empty($email) && !empty($username)){
+        if (!empty($password) && !empty($email) && !empty($username)) {
             $password = md5($password);
-            $sql = "INSERT INTO `users`(`password`, `email`, `username`) VALUES ('$password','$email','$username')";
-            $rs =$con->query($sql);
-            if($rs){
-                header('location:login.php');
+            $sql = "INSERT INTO `users` (`password`, `email`, `username`) VALUES (:password, :email, :username)";
+            $rs = $con->prepare($sql);
+            $rs->bindParam(':password', $password);
+            $rs->bindParam(':email', $email);
+            $rs->bindParam (':username', $username);
+            if ($rs) {
+                header('Location: login.php');
                 echo '
                 <script>
                     $(document).ready(function(){
@@ -25,12 +32,11 @@ function register(){
                             icon: "success",
                             button: "Done",
                         });
-                    })
+                    });
                 </script>
                 ';
             } 
-        }
-        else{
+        } else {
             echo '
                 <script>
                     $(document).ready(function(){
@@ -40,7 +46,7 @@ function register(){
                             icon: "error",
                             button: "Done",
                         });
-                    })
+                    });
                 </script>
                 ';
         }
@@ -48,18 +54,22 @@ function register(){
 }
 register();
 session_start();
-function login(){
+function login() {
     global $con;
-    if(isset($_POST['btn_login'])){
+    if (isset($_POST['btn_login'])) {
         $name_email = $_POST['name_email'];
         $password = $_POST['password'];
         $password = md5($password);
-        $sql = "SELECT `id` FROM `users` WHERE (`username` = '$name_email' OR `email` = '$name_email') AND `password` = '$password'";
-        $rs = $con->query($sql);
-        $row = mysqli_fetch_assoc($rs);
-        if(!empty($row)){ 
+        $sql = "SELECT `id` FROM `users` WHERE (`username` = :name_email OR `email` = :name_email) AND `password` = :password";
+        $rs = $con->prepare($sql);
+        $rs->bindParam(':name_email', $name_email);
+        $rs->bindParam(':password', $password);
+        $rs->execute();
+        $row = $rs->fetch(PDO::FETCH_ASSOC);
+        if (!empty($row)) { 
             $_SESSION['user'] = $row['id'];
-            header('location:index.php');
+            header('Location: index.php');
+            exit; 
         } else {
             echo '
             <script>
@@ -70,7 +80,7 @@ function login(){
                         icon: "error",
                         button: "Done",
                     });
-                })
+                });
             </script>
             ';
         }
@@ -87,7 +97,7 @@ function logout(){
 logout();
 function insert_data() {
     global $con;
-    if (isset($_POST['btn_add'])) {
+    if (isset($_POST['btn_add_product'])) {
         $name = $_POST['pro_name'];
         $price = $_POST['pro_price'];
         $stock = $_POST['pro_stock'];
@@ -126,34 +136,31 @@ function insert_data() {
     }
 }
 insert_data();
+
 function get_data() {
-    global $con;
-    $sql = "SELECT * FROM `products` ORDER BY id DESC";
-    $rs = $con->query($sql);
-    // Check if the query was successful
-    if ($rs) {
-        while ($row = mysqli_fetch_assoc($rs)) {
-            echo '
-                <tr>
-                    <td>' . $row['id'] . '</td>
-                    <td>' . $row['name'] . '</td>
-                    <td>' . $row['stock'] . '</td>
-                    <td>' . $row['price'].'$'.  '</td>
-                    <td>' . $row['tpye'] .'</td>
-                    <td><img src="images/' . $row['images'] . '" width="60"></td>
-                    
-                    <td class="mt-5">
-                        <button id="openEdit" name="btn_update" class="btn btn-warning btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal">Update</button>
-                        <form method="post">
-                            <input type="hidden" name="txt_id" value="' . $row['id'] . '">
-                            <button name="btn_delete" type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            ';
-        }
-    } else {
-        echo "Error: " . $con->error; // Display error message if query fails
+    global $con; 
+    $sql = $con->query("SELECT * FROM `products` ORDER BY id DESC");
+    $results = $sql->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($results as $row) {
+        echo '
+            <tr>
+                <td>' . htmlspecialchars($row['id']) . '</td>
+                <td>' . htmlspecialchars($row['name']) . '</td>
+                <td>' . htmlspecialchars($row['stock']) . '</td>
+                <td>' . htmlspecialchars($row['price']) . '$</td>
+                <td>' . htmlspecialchars($row['tpye']) . '</td>
+                <td><img src="images/' . htmlspecialchars($row['images']) . '" width="60"></td>
+                <td>
+                    <div>
+                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">Update</button>
+                    </div>    
+                    <form method="post" style="display:inline;">
+                        <input type="hidden" name="txt_id" value="' . htmlspecialchars($row['id']) . '">
+                        <button name="btn_delete" type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        ';
     }
 }
 // not successful
@@ -213,59 +220,61 @@ function update_data() {
 }
 update_data();
 function delete_data() {
-    global $con;
+    global $con; // Assume $con is your PDO connection
     if (isset($_POST['btn_delete'])) {
         $id = $_POST['txt_id'];
-        $sql = "SELECT images FROM `products` WHERE `id` = '$id'";
-        $result = $con->query($sql);
-        if ($result && $result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            $imagePath = 'images/' . $row['images']; 
-            $sql = "DELETE FROM `products` WHERE `id` = '$id'";
-            $deleteResult = $con->query($sql);
-            if ($deleteResult) {
+        $sql = ("SELECT images FROM `products` WHERE `id` = :id");
+        $rs = $con->prepare($sql); 
+        $rs->execute([':id' => $id]);
+        $row = $rs->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $imagePath = 'images/' . $row['images'];
+            $rs = $con->prepare("DELETE FROM `products` WHERE `id` = :id");
+            if ($rs->execute([':id' => $id])) {
                 if (file_exists($imagePath)) {
-                    unlink($imagePath); 
+                    unlink($imagePath); // Delete the image file
                 }
                 echo '
                     <script>
-                            $(document).ready(function(){
-                                Swal.fire({
+                        $(document).ready(function(){
+                            Swal.fire({
                                 title: "Data has been deleted successfully!",
                                 icon: "success",
                                 draggable: true
-                                });
                             });
-                        </script>
+                        });
+                    </script>
                 ';
-            } 
+            }
         }
     }
 }
 delete_data();
-
 function search_data() {
-    global $con;
+    global $con; // Assume $con is your PDO connection
     if (isset($_POST['search_query']) && !empty($_POST['search_query'])) {
         $search_query = $_POST['search_query'];
-        $search_query =  mysqli_real_escape_string($con, $search_query); // Sanitize input
-        $sql = "SELECT * FROM `products` WHERE `name` LIKE '%$search_query%' OR `tpye` LIKE '%$search_query%' ORDER BY id DESC";
-        $rs = $con->query($sql);
-        if ($rs->num_rows > 0) {
-            while ($row = mysqli_fetch_assoc($rs)) {
+        $search_query = "%$search_query%"; 
+        $sql = "SELECT * FROM `products` WHERE `name` LIKE :search OR `tpye` LIKE :search ORDER BY id DESC";
+        $rs = $con->prepare($sql);
+        $rs->execute([':search' => $search_query]);
+        if ($rs->rowCount() > 0) {
+            while ($row = $rs->fetch(PDO::FETCH_ASSOC)) {
                 echo '
                     <tr>
-                        <td>' . $row['id'] . '</td>
-                        <td>' . $row['name'] . '</td>
-                        <td>' . $row['stock'] . '</td>
-                        <td>' . $row['price'].'$'. '</td>
-                        <td>' . $row['tpye'] . '</td>
-                        <td><img src="images/' . $row['images'] . '" width="60"></td>
-                        <td class="mt-5">
-                            <button id="openEdit" name="btn_update" class="btn btn-warning mt-4" data-bs-toggle="modal" data-bs-target="#exampleModal">Update</button>
-                            <form method="post">
-                                <input type="hidden" name="txt_id" value="' . $row['id'] . '">
-                                <button name="btn_delete" type="submit" class="btn btn-danger">Delete</button>
+                        <td>' . htmlspecialchars($row['id']) . '</td>
+                        <td>' . htmlspecialchars($row['name']) . '</td>
+                        <td>' . htmlspecialchars($row['stock']) . '</td>
+                        <td>' . htmlspecialchars($row['price']) . '$</td>
+                        <td>' . htmlspecialchars($row['tpye']) . '</td>
+                        <td><img src="images/' . htmlspecialchars($row['images']) . '" width="60"></td>
+                        <td>
+                            <div>
+                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">Update</button>
+                            </div>    
+                            <form method="post" style="display:inline;">
+                                <input type="hidden" name="txt_id" value="' . htmlspecialchars($row['id']) . '">
+                                <button name="btn_delete" type="submit" class="btn btn-danger btn-sm">Delete</button>
                             </form>
                         </td>
                     </tr>
@@ -274,10 +283,9 @@ function search_data() {
         } else {
             echo '<tr><td colspan="7">No results found.</td></tr>';
         }
-       
     }
-    
 }
+
 
 
 

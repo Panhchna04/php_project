@@ -1,3 +1,12 @@
+<?php
+	$current_page = basename($_SERVER['PHP_SELF']);
+?>
+<style>
+	.active {
+  	background-color:rgba(240, 240, 240, 0.23); /* Optional: background color for active item */
+}
+</style>
+
 <div class="top-header-area" id="sticker">
     <div class="container">
         <div class="row">
@@ -10,12 +19,10 @@
                     </div>
                     <nav class="main-menu">
                         <ul>
-                            <li class="current-list-item"><a href="index.php">Home</a></li>
-                            <li><a href="about.php">About</a></li>
-                            <li><a href="shop.php">Shop</a></li>
-                            <li><a href="contact.php">Contact</a></li>
-                          
-                            
+                        <li class="<?php echo $current_page == 'index.php' ? 'active bg' : ''; ?>"><a href="index.php">Home</a></li>
+                            <li class="<?php echo $current_page == 'about.php' ? 'active' : ''; ?>"><a href="about.php">About</a></li>
+                            <li class="<?php echo $current_page == 'shop.php' ? 'active' : ''; ?>"><a href="shop.php">Shop</a></li>
+                            <li class="<?php echo $current_page == 'contact.php' ? 'active' : ''; ?>"><a href="contact.php">Contact</a></li>
                         </ul>
                     </nav>
                 </div>

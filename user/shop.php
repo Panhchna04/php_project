@@ -1,3 +1,11 @@
+<?php
+	$current_page = basename($_SERVER['PHP_SELF']);
+?>
+<style>
+	.active {
+  	background-color:rgba(179, 177, 177, 0.23); /* Optional: background color for active item */
+}
+</style>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,10 +59,10 @@
                     </div>
                     <nav class="main-menu">
                         <ul>
-                            <li class="current-list-item"><a href="index.php">Home</a></li>
-                            <li><a href="about.php">About</a></li>
-                            <li><a href="shop.php">Shop</a></li>
-                            <li><a href="contact.php">Contact</a></li>
+                            <li class="<?php echo $current_page == 'index.php' ? 'active' : ''; ?>"><a href="index.php">Home</a></li>
+                            <li class="<?php echo $current_page == 'about.php' ? 'active' : ''; ?>"><a href="about.php">About</a></li>
+                            <li class="<?php echo $current_page == 'shop.php' ? 'active' : ''; ?>"><a href="shop.php">Shop</a></li>
+                            <li class="<?php echo $current_page == 'contact.php' ? 'active' : ''; ?>"><a href="contact.php">Contact</a></li>
                             <li>
                                 <div class="header-icons">
                                     <a class="shopping-cart" href="checkout.php" data-toggle="modal" data-target="#cartModal">
